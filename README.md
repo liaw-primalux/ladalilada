@@ -25,3 +25,22 @@ Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To u
 ## Further help
 
 To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.io/cli) page.
+
+## Deploy to Firebase
+If not already installed, run
+npm install -g firebase-tools
+
+In root folder, run
+firebase login
+
+Then run the following, and select Hosting when prompted.
+firebase init
+
+Select existing Firebase project, and specify public directory as dist/ladalilada. 
+Choose Yes to configure as single-page app.
+
+Run
+ng build --configuration production
+
+Finally run
+firebase deploy
