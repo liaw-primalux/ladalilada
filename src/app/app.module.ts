@@ -5,14 +5,16 @@ import { AppComponent } from './app.component';
 import { FormsModule } from '@angular/forms';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
-import { AngularFireModule } from '@angular/fire/compat';
-import { AngularFirestoreModule } from '@angular/fire/compat/firestore';
 import { environment } from 'src/environments/environment';
-import { RouterLink, RouterLinkActive, RouterModule, RouterOutlet, Routes } from '@angular/router';
+import { RouterModule, Routes } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { provideFirebaseApp, initializeApp } from '@angular/fire/app';
+import { getFirestore, provideFirestore } from '@angular/fire/firestore';
 
 const routes: Routes = [
-  { path: ':id', component: AppComponent }
+  { path: ':id', component: AppComponent },
+  { path: '', component: AppComponent },
+
 ];
 
 @NgModule({
@@ -21,14 +23,15 @@ const routes: Routes = [
   ],
   imports: [
     BrowserModule,
-    CommonModule, RouterOutlet, RouterLink, RouterLinkActive,
+    CommonModule,
     FormsModule,
     BrowserAnimationsModule,
     RouterModule.forRoot(routes),
-    AngularFireModule.initializeApp(environment.firebase),
-    AngularFirestoreModule,
   ],
-  providers: [],
+  providers: [
+    provideFirebaseApp(() => initializeApp(environment.firebase)),
+    provideFirestore(() => getFirestore()),
+  ],
   bootstrap: [
     AppComponent
   ]
