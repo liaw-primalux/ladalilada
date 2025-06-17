@@ -7,6 +7,8 @@ import {
   query,
   stagger
 } from '@angular/animations';
+import { ActivatedRoute, Router } from '@angular/router';
+import { AngularFirestore } from '@angular/fire/compat/firestore';
 
 @Component({
   selector: 'app-root',
@@ -92,9 +94,71 @@ export class AppComponent {
   teamSize = 2;
   nameList: string[] = [];
   teams: string[][] = [];
-  mergeRemainders: boolean = true;
+  mergeRemainders: boolean = false;
 
   assignedTeamNames: string[] = [];
+
+  constructor(
+    private firestore: AngularFirestore,
+    private route: ActivatedRoute,
+    private router: Router
+  ) { }
+
+  ngOnInit() {
+    this.route.paramMap.subscribe(params => {
+      console.log(params.get('id'))
+    });
+
+    // Check URL for shared ID param, e.g. ?id=xyz
+    this.route.queryParams.subscribe(params => {
+      const sharedId = params['id'];
+      console.log(params)
+      if (sharedId) {
+        // this.loadSharedData(sharedId);
+      }
+    });
+  }
+
+  async saveAndShare() {
+    const data = {
+      nameList: this.nameList,
+      teamSize: this.teamSize,
+      teams: this.teams,
+      mergeRemainders: this.mergeRemainders,
+      assignedTeamNames: this.assignedTeamNames
+    };
+
+    try {
+      console.log('here')
+      // Save data to Firestore collection "sharedTeams"
+      const docRef = await this.firestore.collection('sharedTeams').add(data);
+
+      // Build share URL with document ID
+      // const shareUrl = `${window.location.origin}${window.location.pathname}?id=${docRef.id}`;
+
+      // Optionally update URL in browser without reloading
+      this.router.navigate([], { queryParams: { id: docRef.id }, replaceUrl: true });
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  async loadSharedData(id: string) {
+    try {
+      const doc = await this.firestore.collection('sharedTeams').doc(id).ref.get();
+      if (doc.exists) {
+        const data: any = doc.data();
+        this.nameList = data?.nameList || [];
+        this.teamSize = data?.teamSize || 2;
+        this.teams = data?.teams || [];
+        this.assignedTeamNames = data?.assignedTeamNames || [];
+      } else {
+        console.log('Shared data not found.');
+      }
+    } catch (error) {
+      console.log('Error loading shared data: ' + error)
+    }
+  }
 
   addName() {
     const trimmed = this.nameInput.trim();

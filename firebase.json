@@ -1,6 +1,6 @@
 {
   "hosting": {
-    "public": "dist/ladalilada",
+    "public": "dist/ladalilada/browser",
     "ignore": [
       "firebase.json",
       "**/.*",

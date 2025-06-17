@@ -54,5 +54,11 @@
     </div>
   </div>
 
+  <div class="controls">
+    <!-- your existing controls -->
+    <button (click)="saveAndShare()" [disabled]="nameList.length === 0">
+      🔗 Share This Page
+    </button>
+  </div>
 
 </div>
