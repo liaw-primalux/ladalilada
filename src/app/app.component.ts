@@ -9,22 +9,22 @@ import {
 } from '@angular/animations';
 
 @Component({
-    selector: 'app-root',
-    templateUrl: './app.component.html',
-    styleUrls: ['./app.component.scss'],
-    animations: [
-        trigger('teamAnimation', [
-            transition('* => *', [
-                query(':enter', [
-                    style({ opacity: 0, transform: 'translateY(-20px)' }),
-                    stagger(100, [
-                        animate('400ms ease-out', style({ opacity: 1, transform: 'translateY(0)' }))
-                    ])
-                ], { optional: true })
-            ])
-        ])
-    ],
-    standalone: false
+  selector: 'app-root',
+  templateUrl: './app.component.html',
+  styleUrls: ['./app.component.scss'],
+  animations: [
+    trigger('teamAnimation', [
+      transition('* => *', [
+        query(':enter', [
+          style({ opacity: 0, transform: 'translateY(-20px)' }),
+          stagger(100, [
+            animate('400ms ease-out', style({ opacity: 1, transform: 'translateY(0)' }))
+          ])
+        ], { optional: true })
+      ])
+    ])
+  ],
+  standalone: false
 })
 export class AppComponent {
   teamNamesPool = [
@@ -92,6 +92,7 @@ export class AppComponent {
   teamSize = 2;
   nameList: string[] = [];
   teams: string[][] = [];
+  mergeRemainders: boolean = true;
 
   assignedTeamNames: string[] = [];
 
@@ -104,35 +105,45 @@ export class AppComponent {
   }
 
   shuffleAndGroup() {
-    const shuffled = [...this.nameList];
-    // Fisher-Yates shuffle
-    for (let i = shuffled.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-    }
+    const names = [...this.nameList];
+    this.shuffleArray(names);
 
-    this.teams = [];
-    this.assignedTeamNames = [];
-
-    const fullTeamCount = Math.floor(shuffled.length / this.teamSize);
-    const leftoverCount = shuffled.length % this.teamSize;
-
-    // Create full teams
+    const teams: string[][] = [];
+    const totalTeams = Math.floor(names.length / this.teamSize);
     let index = 0;
-    for (let i = 0; i < fullTeamCount; i++) {
-      const team = shuffled.slice(index, index + this.teamSize);
-      this.teams.push(team);
+
+    for (let i = 0; i < totalTeams; i++) {
+      teams.push(names.slice(index, index + this.teamSize));
       index += this.teamSize;
     }
 
-    // Add leftovers into random teams
-    const leftovers = shuffled.slice(index);
-    for (const name of leftovers) {
-      const randomTeamIndex = Math.floor(Math.random() * this.teams.length);
-      this.teams[randomTeamIndex].push(name);
+    const leftovers = names.slice(index);
+
+    if (leftovers.length > 0) {
+      if (this.mergeRemainders) {
+        // Add leftovers to random existing teams
+        leftovers.forEach(name => {
+          const randomTeam = teams[Math.floor(Math.random() * teams.length)];
+          randomTeam.push(name);
+        });
+      } else {
+        // Leave leftovers in a new team
+        teams.push(leftovers);
+      }
     }
 
-    // Assign team names
+    this.teams = teams;
+    this.generateTeamNames();
+  }
+
+  shuffleArray(array: string[]) {
+    for (let i = array.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [array[i], array[j]] = [array[j], array[i]];
+    }
+  }
+
+  generateTeamNames() {
     const usedNames = new Set<string>();
     for (let i = 0; i < this.teams.length; i++) {
       let name: string;

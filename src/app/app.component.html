@@ -17,6 +17,10 @@
       Team Size
       <input type="number" [(ngModel)]="teamSize" min="1" />
     </label>
+    <label class="checkbox-label">
+      <input type="checkbox" [(ngModel)]="mergeRemainders" />
+      Put leftover members into random teams
+    </label>
 
     <button (click)="shuffleAndGroup()" [disabled]="nameList.length < 2">
       🎲 Sort into Teams
