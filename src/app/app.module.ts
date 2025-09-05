@@ -10,16 +10,18 @@ import { RouterModule, Routes } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { provideFirebaseApp, initializeApp } from '@angular/fire/app';
 import { getFirestore, provideFirestore } from '@angular/fire/firestore';
+import { SorterComponent } from './sorter/sorter.component';
 
 const routes: Routes = [
-  { path: ':id', component: AppComponent },
-  { path: '', component: AppComponent },
+  { path: ':id', component: SorterComponent },
+  { path: '', component: SorterComponent },
 
 ];
 
 @NgModule({
   declarations: [
-    AppComponent
+    AppComponent,
+    SorterComponent
   ],
   imports: [
     BrowserModule,
