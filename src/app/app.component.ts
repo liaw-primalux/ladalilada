@@ -2,6 +2,7 @@ import { Component, inject } from '@angular/core';
 import { trigger, transition, style, animate, query, stagger } from '@angular/animations';
 import { ActivatedRoute, Router } from '@angular/router';
 import { addDoc, collection, collectionData, doc, getDoc, DocumentReference, Firestore } from '@angular/fire/firestore';
+import { DocumentSnapshot, updateDoc } from 'firebase/firestore';
 
 @Component({
   selector: 'app-root',
@@ -86,7 +87,6 @@ export class AppComponent {
     'linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%)'
   ];
 
-
   nameInput = '';
   teamSize = 2;
   nameList: string[] = [];
@@ -94,6 +94,10 @@ export class AppComponent {
   mergeRemainders: boolean = false;
 
   assignedTeamNames: string[] = [];
+
+  id = '';
+  docRef: any;
+  docSnap: DocumentSnapshot | undefined;
 
   constructor(
     private route: ActivatedRoute,
@@ -103,9 +107,9 @@ export class AppComponent {
   ngOnInit() {
     // Check URL for shared ID param, e.g. ?id=xyz
     this.route.queryParams.subscribe(params => {
-      const sharedId = params['id'];
-      if (sharedId)
-        this.loadSharedData(sharedId);
+      this.id = params['id'];
+      if (this.id)
+        this.loadSharedData(this.id);
     });
 
   }
@@ -130,11 +134,11 @@ export class AppComponent {
 
   async loadSharedData(id: string) {
     try {
-      const docRef = doc(this.firestore, 'sharedTeams', id);
-      const docSnap = await getDoc(docRef);
+      this.docRef = doc(this.firestore, 'sharedTeams', id);
+      this.docSnap = await getDoc(this.docRef);
 
-      if (docSnap.exists()) {
-        const data: any = docSnap.data();
+      if (this.docSnap.exists()) {
+        const data: any = this.docSnap.data();
         this.nameList = data?.nameList || [];
         this.teamSize = data?.teamSize || 2;
         this.teams = (data?.teams || []).map((t: any) => t.members);
@@ -183,6 +187,24 @@ export class AppComponent {
 
     this.teams = teams;
     this.generateTeamNames();
+
+    // 🔥 update Firestore if we already have a document
+    if (this.id) {
+      const data = {
+        nameList: this.nameList,
+        teamSize: this.teamSize,
+        mergeRemainders: this.mergeRemainders,
+        assignedTeamNames: this.assignedTeamNames,
+        teams: this.teams.map(members => ({ members }))
+      };
+
+      try {
+        updateDoc(this.docRef, data);
+      }
+      catch (error) {
+        console.log(error)
+      }
+    }
   }
 
   shuffleArray(array: string[]) {
@@ -193,18 +215,13 @@ export class AppComponent {
   }
 
   generateTeamNames() {
-    const usedNames = new Set<string>();
     for (let i = 0; i < this.teams.length; i++) {
-      let name: string;
-      const maxTries = 100;
-      let tries = 0;
-      do {
-        name = this.teamNamesPool[Math.floor(Math.random() * this.teamNamesPool.length)];
-        tries++;
-      } while (usedNames.has(name) && tries < maxTries);
-
-      usedNames.add(name);
-      this.assignedTeamNames.push(name);
+      while (this.assignedTeamNames.length < this.teams.length) {
+        let name = this.teamNamesPool[Math.floor(Math.random() * this.teamNamesPool.length)];
+        let nameExists = this.assignedTeamNames.find(x => x == name);
+        if (!nameExists)
+          this.assignedTeamNames.push(name);
+      }
     }
   }
 
