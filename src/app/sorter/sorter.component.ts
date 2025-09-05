@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, inject, ViewChild } from '@angular/core';
 import { trigger, transition, style, animate, query, stagger } from '@angular/animations';
 import { ActivatedRoute, Router } from '@angular/router';
 import { addDoc, collection, collectionData, doc, getDoc, DocumentReference, Firestore } from '@angular/fire/firestore';
@@ -96,18 +96,41 @@ export class SorterComponent {
   assignedTeamNames: string[] = [];
 
   id = '';
+  currentUrlPath = '';
+  showLinkcopied = false;
+
+  @ViewChild('shareBtn', { read: ElementRef }) shareBtn: any;
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
+    private cdRef: ChangeDetectorRef
   ) { }
 
   ngOnInit() {
     this.route.paramMap.subscribe(params => {
       this.id = params.get('id') ?? '';
+      this.currentUrlPath = document.location.protocol + '//' + document.location.hostname + '/' + this.id;
+
       if (this.id)
         this.loadSharedData(this.id);
     });
+  }
+
+  copyToClipboard(): void {
+    let listener = (e: ClipboardEvent) => {
+      e.clipboardData?.setData('text/plain', (this.currentUrlPath));
+      e.preventDefault();
+    };
+    document.addEventListener('copy', listener);
+    document.execCommand('copy');
+    document.removeEventListener('copy', listener);
+
+    this.showLinkcopied = true;
+
+    setTimeout(() => {
+      this.showLinkcopied = false;
+    }, 3000);
   }
 
   async saveAndShare() {
@@ -123,14 +146,17 @@ export class SorterComponent {
       var docRef: any;
       if (!this.id) {
         docRef = await addDoc(this.itemCollection, data);
-        this.router.navigateByUrl('/' + docRef.id);
+        this.id = docRef.id
+        this.router.navigate(['/', docRef.id]);
       }
       else
         docRef = await setDoc(doc(this.firestore, 'sharedTeams', this.id), data);
 
+      this.currentUrlPath = document.location.protocol + '//' + document.location.hostname + '/' + this.id;
+      this.shareBtn.nativeElement.click();
+      this.cdRef.detectChanges();
     } catch (error) {
       console.log('Error when saving: ' + error);
-
       let log = {
         data: JSON.stringify(data),
         error: JSON.stringify(error),
