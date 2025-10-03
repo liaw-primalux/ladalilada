@@ -37,7 +37,12 @@
             "scripts": [
               "node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"
             ],
-            "browser": "src/main.ts"
+            "browser": "src/main.ts",
+            "server": "src/main.server.ts",
+            "prerender": true,
+            "ssr": {
+              "entry": "src/server.ts"
+            }
           },
           "configurations": {
             "production": {
@@ -101,6 +106,34 @@
             ],
             "scripts": [
               "node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"
+            ]
+          }
+        },
+        "server": {
+          "builder": "@angular-devkit/build-angular:server",
+          "options": {
+            "outputPath": "dist/ladalilada/server",
+            "main": "src/server.ts",
+            "tsConfig": "tsconfig.server.json"
+          },
+          "configurations": {
+            "production": {}
+          }
+        },
+        "ssr": {
+          "builder": "@angular-devkit/build-angular:ssr",
+          "options": {
+            "browserTarget": "ladalilada:build:production",
+            "serverTarget": "ladalilada:server:production"
+          }
+        },
+        "prerender": {
+          "builder": "@angular-devkit/build-angular:prerender",
+          "options": {
+            "browserTarget": "ladalilada:build:production",
+            "serverTarget": "ladalilada:server:production",
+            "routes": [
+              "/"
             ]
           }
         }
