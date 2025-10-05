@@ -95,7 +95,7 @@ export class SorterComponent {
 
   assignedTeamNames: string[] = [];
 
-  id = '';
+  id: string | null = '';
   currentUrlPath = '';
   showLinkcopied = false;
 
@@ -109,8 +109,7 @@ export class SorterComponent {
 
   ngOnInit() {
     this.route.paramMap.subscribe(params => {
-      this.id = params.get('id') ?? '';
-      this.currentUrlPath = document.location.protocol + '//' + document.location.hostname + '/' + this.id;
+      this.id = params.get('id');
 
       if (this.id)
         this.loadSharedData(this.id);
@@ -227,6 +226,10 @@ export class SorterComponent {
     this.teams = teams;
     this.generateTeamNames();
 
+    if (this.id)
+      this.router.navigate(['/', this.id], { fragment: 'results' })
+    else
+      this.router.navigate(['/'], { fragment: 'results' })
     // 🔥 update Firestore if we already have a document
     if (this.id)
       this.saveAndShare();

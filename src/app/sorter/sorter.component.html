@@ -13,20 +13,19 @@
     </div>
 
     <div class="controls">
-        <label>
-            Team Size
-            <input type="number" [(ngModel)]="teamSize" min="1" />
-        </label>
-        <label class="checkbox-label">
-            <input type="checkbox" [(ngModel)]="mergeRemainders" />
-            Put leftover members into random teams
-        </label>
+        <label for="teamSize">Team Size</label>
+        <input id="teamSize" type="number" [(ngModel)]="teamSize" min="1" />
 
-        <button (click)="shuffleAndGroup()" [disabled]="nameList.length < 2">
+        <div class="form-check form-switch">
+            <input class="form-check-input" type="checkbox" id="mergeRemainders" [(ngModel)]="mergeRemainders">
+            <label class="form-check-label" for="flexSwitchCheckDefault">Put leftover members into random teams</label>
+        </div>
+
+        <button class="btn-block" (click)="shuffleAndGroup()" [disabled]="nameList.length < 2">
             🎲 Sort into Teams
         </button>
 
-        <button (click)="clearAll()">🗑️ Clear All</button>
+        <button class="btn-block" (click)="clearAll()">🗑️ Clear All</button>
     </div>
 
 
@@ -34,14 +33,24 @@
         <h3>📝 Name List</h3>
         <ul>
             <li *ngFor="let name of nameList; let i = index">
-                👤 {{ name }}
-                <button class="delete-btn" (click)="removeName(i)">🗑️</button>
+                <div class="row">
+                    <div class="col-1">
+                        <div class="p-2">👤</div>
+                    </div>
+                    <div class="col-10">
+                        <div class="p-2">{{ name }}</div>
+                    </div>
+                    <div class="col-1">
+                        <button class="delete-btn pull-right" (click)="removeName(i)">🗑️</button>
+
+                    </div>
+                </div>
             </li>
         </ul>
     </div>
 
 
-    <div *ngIf="teams.length" class="teams-grid" [@teamAnimation]>
+    <div *ngIf="teams.length" id="results" class="teams-grid" [@teamAnimation]>
         <div *ngFor="let team of teams; let i = index" class="team-card"
             [ngStyle]="{ 'background-image': teamGradients[i % teamGradients.length] }">
             <h4>{{ assignedTeamNames[i] || ('Team ' + (i + 1)) }}</h4>

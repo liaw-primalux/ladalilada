@@ -28,7 +28,7 @@ const routes: Routes = [
     CommonModule,
     FormsModule,
     BrowserAnimationsModule,
-    RouterModule.forRoot(routes),
+    RouterModule.forRoot(routes, { anchorScrolling: 'enabled' }),
   ],
   providers: [
     provideFirebaseApp(() => initializeApp(environment.firebase)),

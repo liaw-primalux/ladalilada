@@ -86,8 +86,11 @@ button:disabled {
         align-items: stretch;
     }
 
-    button,
     input {
+        width: 100%;
+    }
+
+    .btn-block {
         width: 100%;
     }
 }
@@ -162,9 +165,6 @@ button:disabled {
 }
 
 .name-list li {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
     padding: 0.3rem 0.5rem;
     background-color: #f3f3f3;
     margin: 0.3rem 0;
@@ -182,4 +182,8 @@ button:disabled {
 
 .delete-btn:hover {
     transform: scale(1.2);
+}
+
+.pull-right {
+    float: right;
 }
