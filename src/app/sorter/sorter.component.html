@@ -64,32 +64,8 @@
     </div>
 
     <div class="controls">
-        <!-- your existing controls -->
-        <button (click)="saveAndShare()" [disabled]="teams.length === 0">
+        <button (click)="saveAndShare(true)" [disabled]="teams.length === 0">
             🔗 Share This Page
         </button>
-    </div>
-</div>
-
-
-<!-- Modal -->
-<button #shareBtn data-bs-toggle="modal" data-bs-target="#linkshareModal" [hidden]="true">
-    🔗 Share This Page
-</button>
-<div class="modal fade" id="linkshareModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h1 class="modal-title fs-5" id="linkshareModalLabel">Copy the link below and share it with your
-                    friends!</h1>
-            </div>
-            <div class="modal-body">
-                <input type="text" class="form-control" id="link-share" [(ngModel)]="currentUrlPath">
-            </div>
-            <div class="modal-footer">
-                <span class="text-primary" *ngIf="showLinkcopied">Link copied!</span>
-                <button type="button" class="btn btn-primary" (click)="copyToClipboard()">Copy</button>
-            </div>
-        </div>
     </div>
 </div>

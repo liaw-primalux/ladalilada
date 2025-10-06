@@ -1,8 +1,9 @@
-import { ChangeDetectorRef, Component, ElementRef, inject, ViewChild } from '@angular/core';
+import { Component, ElementRef, inject, ViewChild } from '@angular/core';
 import { trigger, transition, style, animate, query, stagger } from '@angular/animations';
 import { ActivatedRoute, Router } from '@angular/router';
 import { addDoc, collection, collectionData, doc, getDoc, DocumentReference, Firestore } from '@angular/fire/firestore';
-import { DocumentSnapshot, onSnapshot, serverTimestamp, setDoc, updateDoc } from 'firebase/firestore';
+import { onSnapshot, serverTimestamp, setDoc, updateDoc } from 'firebase/firestore';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-sorter',
@@ -97,14 +98,10 @@ export class SorterComponent {
 
   id: string | null = '';
   currentUrlPath = '';
-  showLinkcopied = false;
-
-  @ViewChild('shareBtn', { read: ElementRef }) shareBtn: any;
 
   constructor(
     private route: ActivatedRoute,
-    private router: Router,
-    private cdRef: ChangeDetectorRef
+    private router: Router
   ) { }
 
   ngOnInit() {
@@ -124,15 +121,9 @@ export class SorterComponent {
     document.addEventListener('copy', listener);
     document.execCommand('copy');
     document.removeEventListener('copy', listener);
-
-    this.showLinkcopied = true;
-
-    setTimeout(() => {
-      this.showLinkcopied = false;
-    }, 3000);
   }
 
-  async saveAndShare() {
+  async saveAndShare(share = false) {
     const data = {
       nameList: this.nameList,
       teamSize: this.teamSize,
@@ -147,13 +138,25 @@ export class SorterComponent {
         docRef = await addDoc(this.itemCollection, data);
         this.id = docRef.id
         this.router.navigate(['/', docRef.id]);
+        this.currentUrlPath = `${document.location.origin}/#/${this.id}`;
       }
-      else
+      else {
         docRef = await setDoc(doc(this.firestore, 'sharedTeams', this.id), data);
+        this.currentUrlPath = document.location.href;
+      }
 
-      this.currentUrlPath = document.location.protocol + '//' + document.location.hostname + '/' + this.id;
-      this.shareBtn.nativeElement.click();
-      this.cdRef.detectChanges();
+      if (share) {
+        Swal.fire({
+          text: 'Copy the link below and share it with your friends!',
+          input: "text",
+          inputValue: this.currentUrlPath,
+          showCancelButton: true
+        }).then((result) => {
+          if (result.value) {
+            this.copyToClipboard();
+          }
+        })
+      }
     } catch (error) {
       console.log('Error when saving: ' + error);
       let log = {
@@ -163,6 +166,10 @@ export class SorterComponent {
       }
       await addDoc(collection(this.firestore, 'errorLogs'), log);
     }
+  }
+
+  share() {
+
   }
 
   async loadSharedData(id: string) {
@@ -226,13 +233,12 @@ export class SorterComponent {
     this.teams = teams;
     this.generateTeamNames();
 
-    if (this.id)
+    if (this.id) {
       this.router.navigate(['/', this.id], { fragment: 'results' })
+      this.saveAndShare(false);
+    }
     else
       this.router.navigate(['/'], { fragment: 'results' })
-    // 🔥 update Firestore if we already have a document
-    if (this.id)
-      this.saveAndShare();
   }
 
   shuffleArray(array: string[]) {
@@ -243,6 +249,7 @@ export class SorterComponent {
   }
 
   generateTeamNames() {
+    this.assignedTeamNames = [];
     for (let i = 0; i < this.teams.length; i++) {
       while (this.assignedTeamNames.length < this.teams.length) {
         let name = this.teamNamesPool[Math.floor(Math.random() * this.teamNamesPool.length)];

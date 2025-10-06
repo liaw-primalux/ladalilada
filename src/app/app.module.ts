@@ -7,7 +7,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 import { environment } from 'src/environments/environment';
 import { RouterModule, Routes } from '@angular/router';
-import { CommonModule } from '@angular/common';
+import { CommonModule, HashLocationStrategy, LocationStrategy } from '@angular/common';
 import { provideFirebaseApp, initializeApp } from '@angular/fire/app';
 import { getFirestore, provideFirestore } from '@angular/fire/firestore';
 import { SorterComponent } from './sorter/sorter.component';
@@ -31,6 +31,7 @@ const routes: Routes = [
     RouterModule.forRoot(routes, { anchorScrolling: 'enabled' }),
   ],
   providers: [
+    { provide: LocationStrategy, useClass: HashLocationStrategy },
     provideFirebaseApp(() => initializeApp(environment.firebase)),
     provideFirestore(() => getFirestore()),
     provideClientHydration(withEventReplay()),
