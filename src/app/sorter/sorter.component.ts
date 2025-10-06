@@ -123,7 +123,7 @@ export class SorterComponent {
     document.removeEventListener('copy', listener);
   }
 
-  async saveAndShare(share = false) {
+  async saveAndShare() {
     const data = {
       nameList: this.nameList,
       teamSize: this.teamSize,
@@ -145,18 +145,17 @@ export class SorterComponent {
         this.currentUrlPath = document.location.href;
       }
 
-      if (share) {
-        Swal.fire({
-          text: 'Copy the link below and share it with your friends!',
-          input: "text",
-          inputValue: this.currentUrlPath,
-          showCancelButton: true
-        }).then((result) => {
-          if (result.value) {
-            this.copyToClipboard();
-          }
-        })
-      }
+      Swal.fire({
+        text: 'Copy the link below and share it with your friends!',
+        input: "text",
+        inputValue: this.currentUrlPath,
+        showCancelButton: true
+      }).then((result) => {
+        if (result.value) {
+          this.copyToClipboard();
+        }
+      });
+
     } catch (error) {
       console.log('Error when saving: ' + error);
       let log = {
@@ -233,12 +232,10 @@ export class SorterComponent {
     this.teams = teams;
     this.generateTeamNames();
 
-    if (this.id) {
-      this.router.navigate(['/', this.id], { fragment: 'results' })
-      this.saveAndShare(false);
-    }
+    if (this.id)
+      this.router.navigate(['/', this.id], { fragment: 'results' });
     else
-      this.router.navigate(['/'], { fragment: 'results' })
+      this.router.navigate(['/'], { fragment: 'results' });
   }
 
   shuffleArray(array: string[]) {
@@ -271,6 +268,8 @@ export class SorterComponent {
   }
 
   clearAll() {
+    this.router.navigate(['/']);
+    this.id = '';
     this.nameInput = '';
     this.nameList = [];
     this.teams = [];
