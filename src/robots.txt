@@ -1,0 +1,6 @@
+# robots.txt for ladalilada.web.app
+User-agent: *
+Allow: /
+
+# Optional: point to your sitemap for faster discovery
+Sitemap: https://lada-li-lada.web.app/sitemap.xml
